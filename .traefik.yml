@@ -3,7 +3,6 @@ type: middleware
 iconPath: .assets/icon.png
 
 import: github.com/tilak999/traefikplugin
-
 summary: '[Demo] Add Request Header'
 
 testData:

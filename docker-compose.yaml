@@ -6,7 +6,7 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--experimental.plugins.myheaderplugin.modulename=github.com/tilak999/traefikplugin"
-      - "--experimental.plugins.myheaderplugin.version=v0.0.2"
+      - "--experimental.plugins.myheaderplugin.version=v0.0.3"
     ports:
       - "80:80"     # HTTP
       - "8080:8080" # Dashboard
