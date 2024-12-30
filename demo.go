@@ -3,6 +3,7 @@ package traefikplugin
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 )
 
@@ -52,6 +53,7 @@ func (crw *CustomResponseWriter) WriteHeader(code int) {
 
 // ServeHTTP implements the middleware interface
 func (p *Plugin) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+	fmt.Printf("ServeHTTP: %s", req.URL)
 	// Create custom response writer
 	customRW := &CustomResponseWriter{
 		ResponseWriter: rw,
@@ -64,6 +66,7 @@ func (p *Plugin) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	// After the response has been written, you can access the header value
 	// For example, you could add it to a different header
 	if customRW.headerValue != "" {
-		rw.Header().Set("X-Captured-Header", customRW.headerValue)
+		//fmt.Printf("X-Captured-Header: %s", customRW.headerValue)
+		rw.Header().Add("X-Captured-Header", customRW.headerValue)
 	}
 }
