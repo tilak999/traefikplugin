@@ -1,5 +1,5 @@
-// Package plugindemo a demo plugin.
-package plugindemo
+// Package traefikplugin a demo plugin.
+package traefikplugin
 
 import (
 	"bytes"

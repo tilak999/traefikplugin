@@ -1,6 +1,6 @@
 This repository includes an example plugin, `demo`, for you to use as a reference for developing your own plugins.
 
-[![Build Status](https://github.com/traefik/plugindemo/workflows/Main/badge.svg?branch=master)](https://github.com/traefik/plugindemo/actions)
+[![Build Status](https://github.com/traefik/traefikplugin/workflows/Main/badge.svg?branch=master)](https://github.com/traefik/traefikplugin/actions)
 
 The existing plugins can be browsed into the [Plugin Catalog](https://plugins.traefik.io).
 
@@ -39,7 +39,7 @@ The following declaration (given here in YAML) defines a plugin:
 experimental:
   plugins:
     example:
-      moduleName: github.com/traefik/plugindemo
+      moduleName: github.com/traefik/traefikplugin
       version: v0.2.1
 ```
 
@@ -86,7 +86,7 @@ The source code of the plugin should be organized as follows:
     └── src
         └── github.com
             └── traefik
-                └── plugindemo
+                └── traefikplugin
                     ├── demo.go
                     ├── demo_test.go
                     ├── go.mod
@@ -101,10 +101,10 @@ The source code of the plugin should be organized as follows:
 experimental:
   localPlugins:
     example:
-      moduleName: github.com/traefik/plugindemo
+      moduleName: github.com/traefik/traefikplugin
 ```
 
-(In the above example, the `plugindemo` plugin will be loaded from the path `./plugins-local/src/github.com/traefik/plugindemo`.)
+(In the above example, the `traefikplugin` plugin will be loaded from the path `./plugins-local/src/github.com/traefik/traefikplugin`.)
 
 ```yaml
 # Dynamic configuration
