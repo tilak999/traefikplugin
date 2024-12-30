@@ -2,65 +2,68 @@
 package traefikplugin
 
 import (
-	"bytes"
 	"context"
-	"fmt"
 	"net/http"
-	"text/template"
 )
 
-// Config the plugin configuration.
+// Config holds the plugin configuration.
 type Config struct {
-	Headers map[string]string `json:"headers,omitempty"`
+	HeaderToRead string `json:"headerToRead,omitempty"`
 }
 
 // CreateConfig creates the default plugin configuration.
 func CreateConfig() *Config {
 	return &Config{
-		Headers: make(map[string]string),
+		HeaderToRead: "X-Response-Header",
 	}
 }
 
-// Demo a Demo plugin.
-type Demo struct {
-	next     http.Handler
-	headers  map[string]string
-	name     string
-	template *template.Template
+// Plugin holds the plugin configuration
+type Plugin struct {
+	next         http.Handler
+	headerToRead string
 }
 
-// New created a new Demo plugin.
+// New creates a new plugin instance
 func New(ctx context.Context, next http.Handler, config *Config, name string) (http.Handler, error) {
-	if len(config.Headers) == 0 {
-		return nil, fmt.Errorf("headers cannot be empty")
-	}
-
-	return &Demo{
-		headers:  config.Headers,
-		next:     next,
-		name:     name,
-		template: template.New("demo").Delims("[[", "]]"),
+	return &Plugin{
+		next:         next,
+		headerToRead: config.HeaderToRead,
 	}, nil
 }
 
-func (a *Demo) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	for key, value := range a.headers {
-		tmpl, err := a.template.Parse(value)
-		if err != nil {
-			http.Error(rw, err.Error(), http.StatusInternalServerError)
-			return
-		}
+// CustomResponseWriter wraps the standard http.ResponseWriter
+type CustomResponseWriter struct {
+	http.ResponseWriter
+	headerValue  string
+	headerToRead string
+}
 
-		writer := &bytes.Buffer{}
+// WriteHeader captures headers before they're written
+func (crw *CustomResponseWriter) WriteHeader(code int) {
+	// Read the header we're interested in
+	crw.headerValue = crw.ResponseWriter.Header().Get(crw.headerToRead)
 
-		err = tmpl.Execute(writer, req)
-		if err != nil {
-			http.Error(rw, err.Error(), http.StatusInternalServerError)
-			return
-		}
+	// You can do something with the header value here
+	// For example, log it or modify it
 
-		req.Header.Set(key, writer.String())
+	crw.ResponseWriter.WriteHeader(code)
+}
+
+// ServeHTTP implements the middleware interface
+func (p *Plugin) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+	// Create custom response writer
+	customRW := &CustomResponseWriter{
+		ResponseWriter: rw,
+		headerToRead:   p.headerToRead,
 	}
 
-	a.next.ServeHTTP(rw, req)
+	// Call the next handler with our custom response writer
+	p.next.ServeHTTP(customRW, req)
+
+	// After the response has been written, you can access the header value
+	// For example, you could add it to a different header
+	if customRW.headerValue != "" {
+		rw.Header().Set("X-Captured-Header", customRW.headerValue)
+	}
 }
