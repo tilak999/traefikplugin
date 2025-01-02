@@ -1,11 +1,11 @@
-displayName: Demo Plugin
+displayName: Cache Purge Plugin
 type: middleware
 iconPath: .assets/icon.png
 
 import: github.com/tilak999/traefikplugin
-summary: '[Demo] Add Request Header'
+summary: 'Execute Cloudflare purge when response contains x-invalidate-cache header'
 
 testData:
-  Headers:
-    X-Demo: test
-    X-URL: '{{URL}}'
+  headers: 
+    - content-type
+    - Content-Length

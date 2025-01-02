@@ -3,9 +3,11 @@ services:
     image: traefik:v3
     command:
       - "--api.insecure=true"  # Enable dashboard
+      - "--providers.file.directory=/config"
+      - "--providers.file.watch=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      - "--experimental.localPlugins.myheaderplugin.modulename=github.com/tilak999/traefikplugin"
+      - "--experimental.localPlugins.headerDetection.modulename=github.com/tilak999/traefikplugin"
       #- "--experimental.plugins.myheaderplugin.version=v0.0.7"
       - "--entrypoints.web.address=:80"
     ports:
@@ -13,7 +15,8 @@ services:
       - "8080:8080" # Dashboard
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - .:/plugins-local/src/github.com/tilak999/traefikplugin
+      - ./config:/config
+      - ./:/plugins-local/src/github.com/tilak999/traefikplugin
 
   whoami:
     image: traefik/whoami
@@ -23,9 +26,9 @@ services:
       - "traefik.http.routers.whoami.entrypoints=web"
       - "traefik.http.services.whoami.loadbalancer.server.port=80"
       # Enable your custom plugin
-      - "traefik.http.middlewares.myheader.plugin.myheaderplugin.headerToRead=X-Forwarded-For"
+      #- "traefik.http.middlewares.headerPlugin.plugin.headerDetection.headers=x-content-type"
       # Apply the middleware to the router
-      - "traefik.http.routers.whoami.middlewares=myheader@docker"
+      - "traefik.http.routers.whoami.middlewares=headerPlugin@file"
 
 networks:
   default:
