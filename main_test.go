@@ -6,23 +6,23 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	headerDetectionPlugin "github.com/tilak999/traefikplugin"
+	main "github.com/tilak999/traefikplugin"
 )
 
 func TestDemo(t *testing.T) {
-	cfg := headerDetectionPlugin.CreateConfig()
+	cfg := main.CreateConfig()
 	cfg.Headers = append(cfg.Headers, "x-invalidate-cache")
 	cfg.DryRun = true
 	cfg.CloudflareToken = "test"
 	cfg.CloudflareZone = "test"
 
 	ctx := context.Background()
-	next := http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+	next := http.HandlerFunc(func(rw http.ResponseWriter, _ *http.Request) {
 		rw.Header().Add("x-invalidate-cache", "test-value")
-		rw.WriteHeader(200)
+		rw.WriteHeader(http.StatusOK)
 	})
 
-	handler, err := headerDetectionPlugin.New(ctx, next, cfg, "demo-plugin")
+	handler, err := main.New(ctx, next, cfg, "demo-plugin")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -35,16 +35,16 @@ func TestDemo(t *testing.T) {
 
 	handler.ServeHTTP(recorder, req)
 
-	//assertHeader(t, req, "X-Host", "localhost")
-	//assertHeader(t, req, "X-URL", "http://localhost")
-	//assertHeader(t, req, "X-Method", "GET")
-	//assertHeader(t, req, "X-Demo", "test")
+	// assertHeader(t, req, "X-Host", "localhost")
+	// assertHeader(t, req, "X-URL", "http://localhost")
+	// assertHeader(t, req, "X-Method", "GET")
+	// assertHeader(t, req, "X-Demo", "test")
 }
 
-/*func assertHeader(t *testing.T, req *http.Request, key, expected string) {
+/* func assertHeader(t *testing.T, req *http.Request, key, expected string) {
 	t.Helper()
 
 	if req.Header.Get(key) != expected {
 		t.Errorf("invalid header value: %s", req.Header.Get(key))
 	}
-}*/
+} */

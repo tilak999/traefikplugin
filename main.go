@@ -3,6 +3,7 @@ package traefikplugin
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -35,19 +36,20 @@ type HeaderDetectionPlugin struct {
 	name   string
 }
 
+// CustomResponseWriter Custom response writer.
 type CustomResponseWriter struct {
 	http.ResponseWriter
 	*HeaderDetectionPlugin
-	Url             string            `json:"url,omitempty"`
+	URL             string            `json:"url,omitempty"`
 	DetectedHeaders map[string]string `json:"detectedHeaders,omitempty"`
 }
 
 // New created a new Demo plugin.
-func New(ctx context.Context, next http.Handler, config *Config, name string) (http.Handler, error) {
+func New(_ context.Context, next http.Handler, config *Config, name string) (http.Handler, error) {
 	logger := log.New(os.Stdout, "DEBUG: ", log.Ldate|log.Ltime)
 
 	if len(config.Headers) == 0 {
-		return nil, fmt.Errorf("headers cannot be empty")
+		return nil, errors.New("headers cannot be empty")
 	}
 
 	if config.CloudflareToken == "" || config.CloudflareZone == "" {
@@ -55,7 +57,7 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 			config.CloudflareZone, config.CloudflareToken)
 	}
 
-	logger.Println("Plugin initialised, ready to accept connections.")
+	logger.Println("Plugin initialized, ready to accept connections.")
 
 	return &HeaderDetectionPlugin{
 		config: config,
@@ -65,7 +67,7 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 	}, nil
 }
 
-// WriteHeader captures headers before they're written
+// WriteHeader captures headers before they're written.
 func (crw *CustomResponseWriter) WriteHeader(code int) {
 	for _, header := range crw.config.Headers {
 		value := crw.ResponseWriter.Header().Get(header)
