@@ -12,9 +12,15 @@ import (
 func TestDemo(t *testing.T) {
 	cfg := headerDetectionPlugin.CreateConfig()
 	cfg.Headers = append(cfg.Headers, "x-invalidate-cache")
+	cfg.DryRun = true
+	cfg.CloudflareToken = "test"
+	cfg.CloudflareZone = "test"
 
 	ctx := context.Background()
-	next := http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {})
+	next := http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		rw.Header().Add("x-invalidate-cache", "test-value")
+		rw.WriteHeader(200)
+	})
 
 	handler, err := headerDetectionPlugin.New(ctx, next, cfg, "demo-plugin")
 	if err != nil {
@@ -22,7 +28,6 @@ func TestDemo(t *testing.T) {
 	}
 
 	recorder := httptest.NewRecorder()
-
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "http://localhost", nil)
 	if err != nil {
 		t.Fatal(err)
